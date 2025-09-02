@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Task Flow</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span class="logo">Dashboard</span>
+            </div>
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <img id="sidebar-user-avatar" src="https://i.pravatar.cc/150?img=68" alt="User Avatar">
+                </div>
+                <div class="user-info">
+                    <span id="sidebar-username"></span>
+                    <small id="sidebar-useremail"></small>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active"><a href="index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="nav-item"><a href="history.html"><i class="fas fa-history"></i> My Tasks</a></li>
+                    <li class="nav-item"><a href="settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </aside>
+
+        
+        <main class="main-content">
+            
+            <header class="top-bar">
+                <div class="search-bar">
+                    <input type="text" id="search-input" placeholder="Search your task here...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+                <div class="top-bar-actions">
+                    <button id="theme-toggle"><i class="fas fa-sun"></i></button>
+                    <div class="current-date">
+                        <span id="current-day"></span>
+                        <span id="current-date"></span>
+                    </div>
+                </div>
+            </header>
+
+            
+            <section class="welcome-section">
+                <h2 id="welcome-message-dashboard"></h2>
+            </section>
+
+            
+            <div class="dashboard-widgets-grid">
+                
+                <div class="widget to-do-widget">
+                    <div class="widget-header">
+                        <h3>To-Do</h3>
+                    </div>
+                    <div class="widget-body">
+                        <ul id="dashboard-task-list" class="task-list-items">
+                        </ul>
+                        <form id="dashboard-task-form" class="add-task-form">
+                            <input type="text" id="dashboard-task-input" placeholder="New task description" required>
+                            <input type="datetime-local" id="dashboard-due-date-input">
+                            <button type="submit">Add</button>
+                        </form>
+                    </div>
+                </div>
+
+                
+                <div class="widget task-status-widget">
+                    <div class="widget-header">
+                        <h3>Task Status</h3>
+                    </div>
+                    <div class="widget-body status-chart">
+                        <div class="chart-item">
+                            <div class="chart-circle" style="--percentage: 0%; --color: var(--completed-color);"><span>0%</span></div>
+                            <span class="chart-label"><i class="fas fa-circle green"></i> Completed</span>
+                        </div>
+                        <div class="chart-item">
+                            <div class="chart-circle" style="--percentage: 0%; --color: var(--in-progress-color);"><span>0%</span></div>
+                            <span class="chart-label"><i class="fas fa-circle blue"></i> In Progress</span>
+                        </div>
+                        <div class="chart-item">
+                            <div class="chart-circle" style="--percentage: 0%; --color: var(--not-started-color);"><span>0%</span></div>
+                            <span class="chart-label"><i class="fas fa-circle red"></i> Not Started</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="widget completed-tasks-widget">
+                    <div class="widget-header">
+                        <h3>Completed Task</h3>
+                    </div>
+                    <div class="widget-body">
+                        <ul id="dashboard-completed-list" class="task-list-items">
+                        </ul>
+                    </div>
+                </div>
+
+                
+                <div class="widget countdown-widget">
+                    <div class="widget-header">
+                        <h3>Next Deadline</h3>
+                    </div>
+                    <div class="widget-body countdown-display">
+                        <p id="countdown-task-name"></p>
+                        <div id="countdown-timer" class="countdown"></div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
