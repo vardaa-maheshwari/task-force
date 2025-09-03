@@ -1,16 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
-    
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        const email = document.getElementById('email-input').value;
-        const phone = document.getElementById('phone-input').value;
+    const emailInput = document.getElementById('email-input');
 
-        if (email && phone) {
-            localStorage.setItem('userEmail', email);
-            localStorage.setItem('userPhone', phone);
-            window.location.href = 'index.html'; // Redirect to the main to-do list page
-        }
-    });
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const userEmail = emailInput.value.trim();
+            if (userEmail) {
+                localStorage.setItem('userEmail', userEmail);
+                window.location.href = 'index.html';
+            }
+        });
+    }
 });

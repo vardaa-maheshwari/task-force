@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-
     const userEmail = localStorage.getItem('userEmail');
     if (!userEmail) {
         window.location.href = 'login.html';
@@ -233,6 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         renderDashboardTasks();
+        setInterval(renderDashboardTasks, 60000);
         setInterval(updateCountdown, 1000);
     };
 
