@@ -15,7 +15,7 @@
             </div>
             <div class="user-profile">
                 <div class="user-avatar">
-                    <img src="https://i.pravatar.cc/150?img=68" alt="User Avatar">
+                    <img id="sidebar-user-avatar" src="https://i.pravatar.cc/150?img=68" alt="User Avatar">
                 </div>
                 <div class="user-info">
                     <span id="sidebar-username"></span>
@@ -50,12 +50,24 @@
             </header>
             
             <section class="page-header">
-                <h2>All Tasks History</h2>
+                <h2>My Tasks History</h2>
             </section>
             
             <div class="widget full-width-widget">
+                <div class="widget-header">
+                    <h3>Active & Completed Tasks</h3>
+                </div>
                 <div class="widget-body">
                     <ul id="history-task-list" class="task-list-items"></ul>
+                </div>
+            </div>
+
+            <div class="widget full-width-widget deleted-tasks-widget">
+                <div class="widget-header">
+                    <h3>Deleted Tasks</h3>
+                </div>
+                <div class="widget-body">
+                    <ul id="history-deleted-list" class="task-list-items"></ul>
                 </div>
             </div>
         </main>

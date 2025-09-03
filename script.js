@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const username = localStorage.getItem('username') || userEmail.split('@')[0];
     const userPhone = localStorage.getItem('userPhone');
 
-    // --- Global Functions and Elements ---
     const sidebarUsername = document.getElementById('sidebar-username');
     const sidebarUseremail = document.getElementById('sidebar-useremail');
     const currentDay = document.getElementById('current-day');
@@ -17,8 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeToggle = document.getElementById('theme-toggle');
 
     let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    let deletedTasks = JSON.parse(localStorage.getItem('deletedTasks')) || [];
 
-    // Function to load the profile picture across all pages
+    const saveTasks = () => {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        localStorage.setItem('deletedTasks', JSON.stringify(deletedTasks));
+    };
+
     const loadProfilePic = () => {
         const userAvatarElements = document.querySelectorAll('.user-avatar img');
         const storedProfilePic = localStorage.getItem('profilePic');
@@ -30,13 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     loadProfilePic();
 
-    // Set user info in sidebar
     if (sidebarUsername) {
         sidebarUsername.textContent = username;
         sidebarUseremail.textContent = userEmail;
     }
 
-    // Set current date
     const today = new Date();
     const optionsDay = { weekday: 'long' };
     const optionsDate = { day: '2-digit', month: '2-digit', year: 'numeric' };
@@ -45,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
         currentDate.textContent = today.toLocaleDateString('en-GB', optionsDate);
     }
 
-    // Theme Toggle Functionality
     const currentTheme = localStorage.getItem('theme') || 'dark';
     document.body.classList.add(currentTheme + '-theme');
     if (themeToggle) {
@@ -59,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Search functionality (common to all pages)
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
@@ -75,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Handle logout button
     const logoutBtn = document.querySelector('.logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
@@ -84,12 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-
-    // --- Page-Specific Logic ---
     const initDashboardPage = () => {
         const welcomeMessageDashboard = document.getElementById('welcome-message-dashboard');
         const dashboardTaskList = document.getElementById('dashboard-task-list');
         const completedTasksList = document.getElementById('dashboard-completed-list');
+        const failedTasksList = document.getElementById('dashboard-failed-list');
         const taskStatusWidget = document.querySelector('.task-status-widget .status-chart');
         const countdownTaskName = document.getElementById('countdown-task-name');
         const countdownTimerDisplay = document.getElementById('countdown-timer');
@@ -102,7 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
             welcomeMessageDashboard.textContent = `Welcome back, ${username} 👋`;
         }
         
-        // Add a new task (from the dashboard widget)
         if (dashboardTaskForm) {
             dashboardTaskForm.addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -111,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (newTaskText) {
                     tasks.push({ text: newTaskText, completed: false, dueDate: newDueDate });
-                    localStorage.setItem('tasks', JSON.stringify(tasks));
+                    saveTasks();
                     renderDashboardTasks();
                     dashboardTaskInput.value = '';
                     dashboardDueDateInput.value = '';
@@ -122,10 +119,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const renderDashboardTasks = () => {
             dashboardTaskList.innerHTML = '';
             completedTasksList.innerHTML = '';
+            failedTasksList.innerHTML = '';
+            
+            const now = new Date();
             
             tasks.forEach((task, index) => {
+                const isFailed = task.dueDate && !task.completed && new Date(task.dueDate) < now;
                 const li = document.createElement('li');
-                li.className = `task-item ${task.completed ? 'completed' : ''}`;
+                li.className = `task-item ${task.completed ? 'completed' : ''} ${isFailed ? 'failed' : ''}`;
                 li.setAttribute('data-index', index);
 
                 const dueDateObj = task.dueDate ? new Date(task.dueDate) : null;
@@ -134,15 +135,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 li.innerHTML = `
                     <div>
                         <span>${task.text}</span>
-                        <small class="due-date">Due: ${dueDateText}</small>
+                        <small class="due-date">${dueDateText}</small>
                     </div>
                     <div class="actions">
-                        <button class="complete-btn"><i class="fas ${task.completed ? 'fa-undo' : 'fa-check'}"></i></button>
+                        ${!isFailed ? `<button class="complete-btn"><i class="fas ${task.completed ? 'fa-undo' : 'fa-check'}"></i></button>` : `<button class="reschedule-btn">Reschedule</button>`}
                         <button class="delete-btn"><i class="fas fa-trash"></i></button>
                     </div>
                 `;
                 
-                if (task.completed) {
+                if (isFailed) {
+                    failedTasksList.appendChild(li);
+                } else if (task.completed) {
                     completedTasksList.appendChild(li);
                 } else {
                     dashboardTaskList.appendChild(li);
@@ -154,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const updateTaskStatusCharts = () => {
             const totalTasks = tasks.length;
             const completedCount = tasks.filter(task => task.completed).length;
-            const inProgressCount = tasks.filter(task => !task.completed).length;
+            const inProgressCount = tasks.filter(task => !task.completed && (!task.dueDate || new Date(task.dueDate) >= new Date())).length;
             
             const completedPercentage = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0;
             const inProgressPercentage = totalTasks > 0 ? Math.round((inProgressCount / totalTasks) * 100) : 0;
@@ -212,12 +215,20 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (actionButton.classList.contains('complete-btn')) {
                 tasks[index].completed = !tasks[index].completed;
-                localStorage.setItem('tasks', JSON.stringify(tasks));
+                saveTasks();
                 renderDashboardTasks();
             } else if (actionButton.classList.contains('delete-btn')) {
-                tasks.splice(index, 1);
-                localStorage.setItem('tasks', JSON.stringify(tasks));
+                const deletedTask = tasks.splice(index, 1)[0];
+                deletedTasks.push(deletedTask);
+                saveTasks();
                 renderDashboardTasks();
+            } else if (actionButton.classList.contains('reschedule-btn')) {
+                const newDueDate = prompt("Enter a new due date and time (YYYY-MM-DDTHH:MM):");
+                if (newDueDate) {
+                    tasks[index].dueDate = newDueDate;
+                    saveTasks();
+                    renderDashboardTasks();
+                }
             }
         });
 
@@ -227,6 +238,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const initHistoryPage = () => {
         const historyTaskList = document.getElementById('history-task-list');
+        const historyDeletedList = document.getElementById('history-deleted-list');
+        
+        historyTaskList.innerHTML = '';
+        historyDeletedList.innerHTML = '';
+
         tasks.forEach((task, index) => {
             const li = document.createElement('li');
             li.className = `task-item ${task.completed ? 'completed' : ''}`;
@@ -238,6 +254,18 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             historyTaskList.appendChild(li);
         });
+
+        deletedTasks.forEach((task, index) => {
+            const li = document.createElement('li');
+            li.className = `task-item deleted`;
+            li.innerHTML = `
+                <div>
+                    <span>${task.text}</span>
+                    <small class="due-date">Due: ${task.dueDate ? new Date(task.dueDate).toLocaleString() : 'No Due Date'}</small>
+                </div>
+            `;
+            historyDeletedList.appendChild(li);
+        });
     };
 
     const initSettingsPage = () => {
@@ -248,18 +276,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const profilePicInput = document.getElementById('profile-pic-input');
         const profilePicPreview = document.getElementById('profile-pic-preview');
 
-        // Set initial values from local storage
         settingsUsernameInput.value = localStorage.getItem('username') || '';
         settingsEmailInput.value = localStorage.getItem('userEmail') || '';
         settingsPhoneInput.value = localStorage.getItem('userPhone') || '';
         
-        // Update profile picture preview if one exists
         const storedProfilePic = localStorage.getItem('profilePic');
         if (storedProfilePic) {
             profilePicPreview.src = storedProfilePic;
         }
 
-        // Handle profile picture upload
         profilePicInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -274,7 +299,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Handle form submission
         settingsForm.addEventListener('submit', (e) => {
             e.preventDefault();
             localStorage.setItem('username', settingsUsernameInput.value);
@@ -285,7 +309,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // Initialize the correct page based on the URL
     if (window.location.pathname.includes('history.html')) {
         initHistoryPage();
     } else if (window.location.pathname.includes('settings.html')) {
